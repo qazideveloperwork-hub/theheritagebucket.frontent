@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Str;
 
 class Product extends Model
 {
@@ -164,5 +166,29 @@ class Product extends Model
     public function getRouteKeyName(): string
     {
         return 'slug';
+    }
+
+    protected function coverImageUrl(): Attribute
+    {
+        return Attribute::make(get: fn (?string $value) => static::resolveMediaUrl($value));
+    }
+
+    protected function floatingImageUrl(): Attribute
+    {
+        return Attribute::make(get: fn (?string $value) => static::resolveMediaUrl($value));
+    }
+
+    protected function artisanImageUrl(): Attribute
+    {
+        return Attribute::make(get: fn (?string $value) => static::resolveMediaUrl($value));
+    }
+
+    public static function resolveMediaUrl(?string $value): ?string
+    {
+        if (blank($value) || Str::startsWith($value, ['http://', 'https://'])) {
+            return $value;
+        }
+
+        return Setting::mediaBaseUrl().'/'.ltrim($value, '/');
     }
 }
